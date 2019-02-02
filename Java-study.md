@@ -41,7 +41,17 @@ static代码块
 - 类似的还有`<T super Serializable>`：下界通配符（Lower Bounds Wildcards）。两者均是为了给泛型设定边界。下界通配符是用来限定为指定类和指定类的父类。
 - 参考文章：[Java 泛型 <? super T> 中 super 怎么 理解？与 extends 有何不同？](https://www.zhihu.com/question/20400700)
 
+# Bean 复制 与 对象 Clone
 
+Bean 复制和对象Clone其实很类似，至少笔者看不出太大区别。Object的clone()方法就是一个用来实现对象clone的方法。
+
+进行对象克隆有两种方式：
+- 实现Cloneable接口并重写Object类中的clone()方法；
+- 实现Serializable接口，通过对象的序列化和反序列化实现克隆，可以实现真正的深度克隆，代码如下。
+
+另外，在Apache Common Utils里也提供了Bean复制的方法，比较强大，但是实测其进行复制的效率要低于对象的序列化和反序列化实现克隆。
+
+在字段比较少，且对性能要求很高的领域，尽量不要使用Bean复制的方法。参考：[Java Bean Copy框架性能对比](https://yq.aliyun.com/articles/392185)
 
 
 
