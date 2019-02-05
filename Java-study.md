@@ -1,3 +1,14 @@
+<!-- TOC -->
+
+- [异步编程](#%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B)
+    - [notify() 和wait()](#notify-%E5%92%8Cwait)
+- [String](#string)
+- [JVM](#jvm)
+- [Java enum 的本质](#java-enum-%E7%9A%84%E6%9C%AC%E8%B4%A8)
+- [泛型](#%E6%B3%9B%E5%9E%8B)
+- [Bean 复制 与 对象 Clone](#bean-%E5%A4%8D%E5%88%B6-%E4%B8%8E-%E5%AF%B9%E8%B1%A1-clone)
+
+<!-- /TOC -->
 # 异步编程
 
 Thread就是异步编程（通常都需要使用线程池）
@@ -7,6 +18,11 @@ Thread就是异步编程（通常都需要使用线程池）
 
 想要多个线程分别执行，同时阻塞主线程：java.util.concurrent.CountDownLatch
 - 更复杂的工具：java.util.concurrent.CyclicBarrier。可以重置计数器
+
+## notify() 和wait()
+
+我自己的一篇文章：
+[Java 异步编程之：notify 和 wait 用法](https://segmentfault.com/a/1190000018096174)
 
 # String
 `intern()` 方法
