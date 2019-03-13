@@ -17,6 +17,8 @@
 - [5. Java enum 的本质](#5-java-enum-%E7%9A%84%E6%9C%AC%E8%B4%A8)
 - [6. 泛型](#6-%E6%B3%9B%E5%9E%8B)
 - [7. Bean 复制 与 对象 Clone](#7-bean-%E5%A4%8D%E5%88%B6-%E4%B8%8E-%E5%AF%B9%E8%B1%A1-clone)
+- [Log4j2](#log4j2)
+- [fastjson](#fastjson)
 
 <!-- /TOC -->
 
@@ -157,5 +159,14 @@ Bean 复制和对象Clone其实很类似，至少笔者看不出太大区别。O
 在字段比较少，且对性能要求很高的领域，尽量不要使用Bean复制的方法。参考：[Java Bean Copy框架性能对比](https://yq.aliyun.com/articles/392185)
 
 
+# Log4j2
 
+- 异步打印日志，效率较高。
+- 系统的System.out等日志会被忽略；程序抛出的异常日志会被忽略。如果需要捕获，需要手动try...catch...然后log.error打印
+
+# fastjson
+
+json序列化工具。很常用。
+
+- 被序列化的类，在从json转换为对象的时候，需要有无参数的构造方法，否则报异常。
 
