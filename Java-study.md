@@ -19,6 +19,7 @@
 - [7. Bean 复制 与 对象 Clone](#7-bean-%E5%A4%8D%E5%88%B6-%E4%B8%8E-%E5%AF%B9%E8%B1%A1-clone)
 - [Log4j2](#log4j2)
 - [fastjson](#fastjson)
+- [跑批任务注意事项](#%E8%B7%91%E6%89%B9%E4%BB%BB%E5%8A%A1%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
 
 <!-- /TOC -->
 
@@ -170,3 +171,15 @@ json序列化工具。很常用。
 
 - 被序列化的类，在从json转换为对象的时候，需要有无参数的构造方法，否则报异常。
 
+# 跑批任务注意事项
+
+- 一些周期较长的（比如一周、一个月）执行一次的跑批任务，其中如果有http请求这种网络IO操作，网络IO一旦超时，可能会导致跑批任务失败。
+    - 为此，需要增加跑批任务补偿机制，在跑批任务失败的时候，延迟一段时间再次进行跑批。
+- Spring的@Transaction是有超时时间的，如果事务执行的时间过长，可能会导致失败，笔者的一个事务里面，还有HTTP请求，导致整个任务时间过长，超时回滚。
+    - 当然，对于本身执行时间很长的数据库操作，可以在@Transaction里面设置超时时间。
+``` 
+Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLTransactionRollbackException: Lock wait timeout exceeded; try restarting transactio
+```
+- 使用了类似dubbo的RPC框架，通常是Controller-->dubbo service的定时任务。如果service速度过慢，可能会导致dubbo触发重发逻辑
+    - 关闭dubbo重发逻辑（不推荐，需要配置很多东西，人为处理容易出错）
+    - dubbo的provider需要及时响应用户，无论是使用多线程处理任务，还是使用MQ异步处理任务。但是要小心，如果provider里面还调用了其他的dubbo服务，简单的使用异步处理仍旧不能根本解决问题，此问题的解法时，一定需要找到耗时严重的根本位置。
