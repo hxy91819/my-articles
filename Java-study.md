@@ -186,6 +186,7 @@ Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLTransactio
         - <dubbo:reference interface="com.xxx.interface.MyFacade" id="myFacade" check="false" timeout="1200000"/>
         - <dubbo:reference interface="com.xxx.interface.MyFacade" id="myFacade" check="false" retries="-1"/>
     - dubbo的provider需要及时响应用户，无论是使用多线程处理任务，还是使用MQ异步处理任务。但是要小心，如果provider里面还调用了其他的dubbo服务，简单的使用异步处理仍旧不能根本解决问题，此问题的解法时，一定需要找到耗时严重的根本位置。
+    - 通常我们使用facade包装dubbo开放出去的方法，一般这个方法都会使用aop去拦截，做一些统计、日志等处理。涉及到调用链时，尽量不要循环调用facade。特别是微服务内部调用，禁止调用自己的facade。
 
 # @Transaction与动态代理
 
