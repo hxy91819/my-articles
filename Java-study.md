@@ -21,6 +21,7 @@
 - [fastjson](#fastjson)
 - [跑批任务注意事项](#%E8%B7%91%E6%89%B9%E4%BB%BB%E5%8A%A1%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
 - [@Transaction与动态代理](#transaction%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86)
+- [HashMap和HashSet](#hashmap%E5%92%8Chashset)
 
 <!-- /TOC -->
 
@@ -234,3 +235,7 @@ JDK自己提供了动态代理的方法：java.lang.reflect.Proxy#newProxyInstan
 框架是前人智慧的精华，通过他们了解他们的设计思路，我们可以学习到他们用到了什么优秀的基础知识。在工作中，不学习框架说的并不是要你不求甚解，只要会用就行了，而是要你能够理解框架背后的通用的原理。
 
 不过作者也没错，并不是每个人都像他一样，研读了各大主流的框架呢。
+
+# HashMap和HashSet
+
+在某些业务逻辑中，因集和的顺序不同可能会产生不同结果的时候，如果适用HashMap或者HashSet，可能会出现数据完全相同，但是产生的结果不同的问题。
