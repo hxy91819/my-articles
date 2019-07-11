@@ -191,6 +191,7 @@ Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLTransactio
 
 
 在一些跑批任务的时候，我们往往会通过dubbo查询大量的数据，但是由于dubbo自带了超时的机制，一旦数据量过大，可能会因为超时，导致流程中断。解决方案：
+- 一个大而全的RPC方法，虽然可以减少远程调用，但是也要同时考虑到这个方法能否在超时时间内返回，这个方法的数据量，是否会随着业务的增长而不断变大
 - 将数据分片执行
 - 但是在使用guava的Lists.partition方法进行分片的时候，要注意，得到的List是没有序列化的。如果要调用dubbo这样的远程服务，需要使用new ArrayList(List)进行一次包装
 - 数据进行分片之后，需要考虑数据去重问题，因为有些方法在一起调用的时候，会对整体做去重操作，特别是当方法返回Map和Set的时候。
