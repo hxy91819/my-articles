@@ -22,6 +22,7 @@
 - [跑批任务注意事项](#%E8%B7%91%E6%89%B9%E4%BB%BB%E5%8A%A1%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
 - [@Transaction与动态代理](#transaction%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86)
 - [HashMap和HashSet](#hashmap%E5%92%8Chashset)
+- [fastjson](#fastjson)
 
 <!-- /TOC -->
 
@@ -249,3 +250,11 @@ JDK自己提供了动态代理的方法：java.lang.reflect.Proxy#newProxyInstan
 # HashMap和HashSet
 
 在某些业务逻辑中，因集和的顺序不同可能会产生不同结果的时候，如果适用HashMap或者HashSet，可能会出现数据完全相同，但是产生的结果不同的问题。
+
+# fastjson
+
+解决map的key为数字的时候，生成的json非标准格式的问题（标准json的key，不能为数字，必须为字符串）
+
+`JSON.toJSONString(autoScheduleParamDTO.getParamDTO(), SerializerFeature.WriteNonStringKeyAsString)`
+
+使用`SerializerFeature.WriteNonStringKeyAsString`即可
