@@ -10,12 +10,29 @@
     - [错误&异常案例](#%E9%94%99%E8%AF%AF%E5%BC%82%E5%B8%B8%E6%A1%88%E4%BE%8B)
         - [exception: org.apache.ibatis.binding.BindingException: Invalid bound statement (not found)](#exception-orgapacheibatisbindingbindingexception-invalid-bound-statement-not-found)
         - [Text和Blob字段问题](#text%E5%92%8Cblob%E5%AD%97%E6%AE%B5%E9%97%AE%E9%A2%98)
+        - [resultMap和resultType常见错误](#resultmap%E5%92%8Cresulttype%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF)
 
 <!-- /TOC -->
 
 # MyBatis相关
 
 ## 通用知识点
+
+MyBatis如果查询字段到BaseResultMap中，查询的字段全部为null的化，其返回的实体类也是null，所以保险起见，必须把id查询出来。
+
+范例：
+
+```
+MiniappUser selectNicknameAvatarurl(@Param("openId") String openId);
+```
+
+```
+<select id="selectNicknameAvatarurl" resultMap="BaseResultMap">
+    select id, nick_name, avatarUrl from hc_hiwork_center.t_hc_miniapp_user
+    where open_id = #{openId}
+    limit 1
+</select>
+```
 
 ### MyBatis Where语句中判断字段是否存在
 
@@ -232,3 +249,9 @@ where id = #{id,jdbcType=BIGINT}
 常规情况下这样的代码没有问题。但是一旦是我们将字段冲Varchar改成了Text，就会出问题了，以前代码里如果用到了`BaseResultMap`和`Base_Column_List`，而且想要把Text字段查询出来，则需要修改为`ResultMapWithBLOBs`和`<include refid="Base_Column_List" />,<include refid="Blob_Column_List" />`。
 
 无论怎样，Text字段一定要单独使用一条SQL来查询，尽量避免和其他字段一起查询出来，使用select *来进行查询，这种是需要严格杜绝的。
+
+Text字段是由长度限制的，普通的Text，最大为64kb，longText最大为4GB。一次性不要查询那么大的数据，请使用流式查询。
+
+### resultMap和resultType常见错误
+
+再些XML代码的时候，经常会复制粘贴，如果返回时一个List<T>的话，要特别注意类型是否与resultType对应。如果使用resultMap，则List里面会填充这个表的实体类。且不会报错！！！
