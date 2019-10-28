@@ -1,30 +1,4 @@
-<!-- TOC -->
-
-- [1. 前言](#1-%E5%89%8D%E8%A8%80)
-- [2. 异步编程](#2-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B)
-    - [多线程](#%E5%A4%9A%E7%BA%BF%E7%A8%8B)
-    - [2.1. notify() 和wait()](#21-notify-%E5%92%8Cwait)
-    - [2.2. 锁](#22-%E9%94%81)
-        - [2.2.1. 对象监视器monitor](#221-%E5%AF%B9%E8%B1%A1%E7%9B%91%E8%A7%86%E5%99%A8monitor)
-        - [2.2.2. 死锁、锁饥饿](#222-%E6%AD%BB%E9%94%81%E3%80%81%E9%94%81%E9%A5%A5%E9%A5%BF)
-        - [2.2.3. synchronized](#223-synchronized)
-        - [2.2.4. ReentrantLock](#224-reentrantlock)
-    - [2.3. 多线程控制（可见性）](#23-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8E%A7%E5%88%B6%EF%BC%88%E5%8F%AF%E8%A7%81%E6%80%A7%EF%BC%89)
-        - [2.3.1. Semaphore信号量](#231-semaphore%E4%BF%A1%E5%8F%B7%E9%87%8F)
-        - [2.3.2. CountDownLatch](#232-countdownlatch)
-- [3. String](#3-string)
-- [4. JVM](#4-jvm)
-- [5. Java enum 的本质](#5-java-enum-%E7%9A%84%E6%9C%AC%E8%B4%A8)
-- [6. 泛型](#6-%E6%B3%9B%E5%9E%8B)
-- [7. Bean 复制 与 对象 Clone](#7-bean-%E5%A4%8D%E5%88%B6-%E4%B8%8E-%E5%AF%B9%E8%B1%A1-clone)
-- [Log4j2](#log4j2)
-- [fastjson](#fastjson)
-- [跑批任务注意事项](#%E8%B7%91%E6%89%B9%E4%BB%BB%E5%8A%A1%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
-- [@Transaction与动态代理](#transaction%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86)
-- [HashMap和HashSet](#hashmap%E5%92%8Chashset)
-- [fastjson](#fastjson)
-
-<!-- /TOC -->
+<!-- TOC -->autoauto- [1. 前言](#1-前言)auto- [2. 异步编程](#2-异步编程)auto    - [多线程](#多线程)auto    - [2.1. notify() 和wait()](#21-notify-和wait)auto    - [2.2. 锁](#22-锁)auto        - [2.2.1. 对象监视器monitor](#221-对象监视器monitor)auto        - [2.2.2. 死锁、锁饥饿](#222-死锁锁饥饿)auto        - [2.2.3. synchronized](#223-synchronized)auto        - [2.2.4. ReentrantLock](#224-reentrantlock)auto    - [2.3. 多线程控制（可见性）](#23-多线程控制可见性)auto        - [2.3.1. Semaphore信号量](#231-semaphore信号量)auto        - [2.3.2. CountDownLatch](#232-countdownlatch)auto- [3. String](#3-string)auto- [4. JVM](#4-jvm)auto- [5. Java enum 的本质](#5-java-enum-的本质)auto- [6. 泛型](#6-泛型)auto- [7. Bean 复制 与 对象 Clone](#7-bean-复制-与-对象-clone)auto- [Log4j2](#log4j2)auto- [fastjson](#fastjson)auto- [跑批任务注意事项](#跑批任务注意事项)auto- [@Transaction与动态代理](#transaction与动态代理)auto- [HashMap和HashSet](#hashmap和hashset)auto- [fastjson](#fastjson-1)auto- [编码经验](#编码经验)autoauto<!-- /TOC -->
 
 # 1. 前言
 
@@ -258,3 +232,11 @@ JDK自己提供了动态代理的方法：java.lang.reflect.Proxy#newProxyInstan
 `JSON.toJSONString(autoScheduleParamDTO.getParamDTO(), SerializerFeature.WriteNonStringKeyAsString)`
 
 使用`SerializerFeature.WriteNonStringKeyAsString`即可
+
+# 编码经验
+
+在编写大型项目的时候，自顶向下开发。当遇到依赖子模块的地方时，先编写子模块的接口，暂时不去实现，先把主流程开发完。
+
+好处是：
+- 主流程在开发中，可能会出现接口调整情况，可以避免实现的逻辑要修改
+- 主流程与业务最接近，这样进行开发可以更加贴近业务，避免一些没有意义的方法实现。而是将编码的方向转为“我需要实现什么目标？”
