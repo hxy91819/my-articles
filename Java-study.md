@@ -180,6 +180,11 @@ Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLTransactio
 
 但是在实际使用中，这个注解有时候会遇到没有生效的情况，因此查找了资料，想知道为什么：https://vitzhou.top/20180822_transation/
 
+@Transaction这个注解管理着事务的传递，如果一个方法A调用方法B，方法A标记了这个注解，但是方法B没有，假设方法A和方法B中均有数据库操作，那么方法A将会开启一个事务，但是方法B不会参与这个事务，并且受到事务隔离级别的影响。
+即，如果方法A插入了一条数据，方法B是无法查询到这条数据的。
+
+## 动态代理
+
 看了之后，发现不得不去深入了解其实现的内部原理——动态代理。
 
 Spring是通过动态代理来实现AOP，进而实现了方便地事务处理。而动态代理是设计模式的一种。在了解它之前，我们需要下了解什么是静态代理：https://juejin.im/post/5a99048a6fb9a028d5668e62
@@ -240,3 +245,53 @@ JDK自己提供了动态代理的方法：java.lang.reflect.Proxy#newProxyInstan
 好处是：
 - 主流程在开发中，可能会出现接口调整情况，可以避免实现的逻辑要修改
 - 主流程与业务最接近，这样进行开发可以更加贴近业务，避免一些没有意义的方法实现。而是将编码的方向转为“我需要实现什么目标？”
+
+# 先插后查，先插入后查询。联动操作无法正确执行的问题。
+
+## 情况一
+
+如下图代码。writerDao和readerDao是不同的DataSource，即使使用了`@Transactional`，也不可能共用一个事务。
+
+所以writerDao插入的数据还没有提交，另外一个数据源对这个数据进行查询一定是查不到的。
+
+事务只能够在同一个数据源里使用。（否则需要考虑使用“分布式事务”，这里不讨论）
+
+这里想要查询到，必须不使用@Transactional。由此可见，@Transactional的使用应当特别注意，必须使用事务的代码，限制在小模块里。如果需要查询到之前代码插入的数据，必须确保事务已经提交。可以重构为C（不使用`@Transactional`）调用B（使用了`@Transactional`），然后B完成了再调用A。
+
+```
+@Override
+@Transactional
+public void insert() {
+    UserMsgInfo userMsgInfo = new UserMsgInfo();
+    long id = idGen.next().id;
+    userMsgInfo.setId(id);
+    userMsgInfo.setAppCode("test");
+    userMsgInfo.setMsgCode("test");
+    int i = userMsgInfoWriterDao.insertSelective(userMsgInfo);
+    UserMsgInfo userMsgInfo1 = userMsgInfoReaderDao.selectByPrimaryKey(id);
+    userMsgInfoTestService.select(id);
+}
+```
+
+## 情况二
+
+```
+@Override
+public void insert() {
+    UserMsgInfo userMsgInfo = new UserMsgInfo();
+    long id = idGen.next().id;
+    userMsgInfo.setId(id);
+    userMsgInfo.setAppCode("test");
+    userMsgInfo.setMsgCode("test");
+    int i = userMsgInfoWriterDao.insertSelective(userMsgInfo);
+    UserMsgInfo userMsgInfo1 = userMsgInfoReaderDao.selectByPrimaryKey(id);
+    userMsgInfoTestService.select(id);
+}
+```
+
+还是上面的例子，不使用`@Transactional`，也可能存在无法查询到的问题。常见的是writerDao和readerDao连接的数据源分别指向了不同的数据库。通常是主库和从库。主从之间需要进行数据同步，我们对从库的查询在同步完成之前就执行了，当然无法查询到数据。
+
+解决这个问题有两个方法：
+
+方法一：如果必须要查到，就使用同一个数据源，并且连接到同一个数据库
+方法二：writerDao在执行方法后，必须阻塞程序执行，并确保所有从库均完成了数据同步才响应。此时能够确保readerDao无论查询哪个从库都可以查到数据。我们现在使用的galera cluster就是这种方案。
