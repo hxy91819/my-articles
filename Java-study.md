@@ -1,4 +1,35 @@
-<!-- TOC -->autoauto- [1. 前言](#1-前言)auto- [2. 异步编程](#2-异步编程)auto    - [多线程](#多线程)auto    - [2.1. notify() 和wait()](#21-notify-和wait)auto    - [2.2. 锁](#22-锁)auto        - [2.2.1. 对象监视器monitor](#221-对象监视器monitor)auto        - [2.2.2. 死锁、锁饥饿](#222-死锁锁饥饿)auto        - [2.2.3. synchronized](#223-synchronized)auto        - [2.2.4. ReentrantLock](#224-reentrantlock)auto    - [2.3. 多线程控制（可见性）](#23-多线程控制可见性)auto        - [2.3.1. Semaphore信号量](#231-semaphore信号量)auto        - [2.3.2. CountDownLatch](#232-countdownlatch)auto- [3. String](#3-string)auto- [4. JVM](#4-jvm)auto- [5. Java enum 的本质](#5-java-enum-的本质)auto- [6. 泛型](#6-泛型)auto- [7. Bean 复制 与 对象 Clone](#7-bean-复制-与-对象-clone)auto- [Log4j2](#log4j2)auto- [fastjson](#fastjson)auto- [跑批任务注意事项](#跑批任务注意事项)auto- [@Transaction与动态代理](#transaction与动态代理)auto- [HashMap和HashSet](#hashmap和hashset)auto- [fastjson](#fastjson-1)auto- [编码经验](#编码经验)autoauto<!-- /TOC -->
+<!-- TOC -->
+
+- [1. 前言](#1-%E5%89%8D%E8%A8%80)
+- [2. 异步编程](#2-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B)
+    - [2.1. 多线程](#21-%E5%A4%9A%E7%BA%BF%E7%A8%8B)
+    - [2.2. notify() 和wait()](#22-notify-%E5%92%8Cwait)
+    - [2.3. 锁](#23-%E9%94%81)
+        - [2.3.1. 对象监视器monitor](#231-%E5%AF%B9%E8%B1%A1%E7%9B%91%E8%A7%86%E5%99%A8monitor)
+        - [2.3.2. 死锁、锁饥饿](#232-%E6%AD%BB%E9%94%81%E3%80%81%E9%94%81%E9%A5%A5%E9%A5%BF)
+        - [2.3.3. synchronized](#233-synchronized)
+        - [2.3.4. ReentrantLock](#234-reentrantlock)
+    - [2.4. 多线程控制（可见性）](#24-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8E%A7%E5%88%B6%EF%BC%88%E5%8F%AF%E8%A7%81%E6%80%A7%EF%BC%89)
+        - [2.4.1. Semaphore信号量](#241-semaphore%E4%BF%A1%E5%8F%B7%E9%87%8F)
+        - [2.4.2. CountDownLatch](#242-countdownlatch)
+- [3. String](#3-string)
+- [4. JVM](#4-jvm)
+- [5. Java enum 的本质](#5-java-enum-%E7%9A%84%E6%9C%AC%E8%B4%A8)
+- [6. 泛型](#6-%E6%B3%9B%E5%9E%8B)
+- [7. Bean 复制 与 对象 Clone](#7-bean-%E5%A4%8D%E5%88%B6-%E4%B8%8E-%E5%AF%B9%E8%B1%A1-clone)
+- [8. Log4j2](#8-log4j2)
+- [9. fastjson](#9-fastjson)
+- [10. 跑批任务注意事项](#10-%E8%B7%91%E6%89%B9%E4%BB%BB%E5%8A%A1%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
+- [11. @Transaction与动态代理](#11-transaction%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86)
+    - [11.1. 动态代理](#111-%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86)
+- [12. HashMap和HashSet](#12-hashmap%E5%92%8Chashset)
+- [13. fastjson](#13-fastjson)
+- [14. 编码经验](#14-%E7%BC%96%E7%A0%81%E7%BB%8F%E9%AA%8C)
+- [15. 先插后查，先插入后查询。联动操作无法正确执行的问题。](#15-%E5%85%88%E6%8F%92%E5%90%8E%E6%9F%A5%EF%BC%8C%E5%85%88%E6%8F%92%E5%85%A5%E5%90%8E%E6%9F%A5%E8%AF%A2%E3%80%82%E8%81%94%E5%8A%A8%E6%93%8D%E4%BD%9C%E6%97%A0%E6%B3%95%E6%AD%A3%E7%A1%AE%E6%89%A7%E8%A1%8C%E7%9A%84%E9%97%AE%E9%A2%98%E3%80%82)
+    - [15.1. 情况一](#151-%E6%83%85%E5%86%B5%E4%B8%80)
+    - [15.2. 情况二](#152-%E6%83%85%E5%86%B5%E4%BA%8C)
+
+<!-- /TOC -->
 
 # 1. 前言
 
@@ -6,7 +37,7 @@
 
 # 2. 异步编程
 
-## 多线程
+## 2.1. 多线程
 
 线程的特点是共享地址空间，从而可以高效地共享数据。
 
@@ -20,28 +51,28 @@ Thread就是异步编程（通常都需要使用线程池）
 想要多个线程分别执行，同时阻塞主线程：java.util.concurrent.CountDownLatch
 - 更复杂的工具：java.util.concurrent.CyclicBarrier。可以重置计数器
 
-## 2.1. notify() 和wait()
+## 2.2. notify() 和wait()
 
 我自己的一篇文章：
 [Java 异步编程之：notify 和 wait 用法](https://segmentfault.com/a/1190000018096174)
 
-## 2.2. 锁
+## 2.3. 锁
 
 锁用于对代码做控制，以避免多个线程竞争同一个资源而出现冲突。
 
-### 2.2.1. 对象监视器monitor
+### 2.3.1. 对象监视器monitor
 
 使用Synchronized进行同步，其关键就是必须要对对象的监视器monitor进行获取，当线程获取monitor后才能继续往下执行，否则就只能等待。
 
 任意一个对象都拥有自己的监视器，当这个对象由同步块或者这个对象的同步方法调用时，执行方法的线程必须先获取该对象的监视器才能进入同步块和同步方法，如果没有获取到监视器的线程将会被阻塞在同步块和同步方法的入口处，进入到BLOCKED状态
 
-### 2.2.2. 死锁、锁饥饿
+### 2.3.2. 死锁、锁饥饿
 
-### 2.2.3. synchronized
+### 2.3.3. synchronized
 
 其内部实际上是一个可重入锁。可以对一个方法进行修饰，执行改类的方法时，将会加锁。甚至也可以对一个代码块进行加锁。
 
-### 2.2.4. ReentrantLock
+### 2.3.4. ReentrantLock
 
 相比于synchronized，ReentrantLock在功能上更加丰富，它具有可重入、可中断、可限时、公平锁等特点。
 
@@ -79,15 +110,15 @@ finally
 - 一般意义上的锁是不公平的，不一定先来的线程能先得到锁，后来的线程就后得到锁。不公平的锁可能会产生饥饿现象。
 - 公平锁的意思就是，这个锁能保证线程是先来的先得到锁。虽然公平锁不会产生饥饿现象，但是公平锁的性能会比非公平锁差很多。
 
-## 2.3. 多线程控制（可见性）
+## 2.4. 多线程控制（可见性）
 
-### 2.3.1. Semaphore信号量
+### 2.4.1. Semaphore信号量
 
 多个线程间无法直接沟通数据。所以JDK提供了一批工具方便我们在线程之上控制多个线程的执行。
 
 信号量的使用类似 lock。设定一个池子，可以限制线程能够最大以此池子的数量进行执行。最大化利用线程。
 
-### 2.3.2. CountDownLatch
+### 2.4.2. CountDownLatch
 
 倒计时。在线程中通过逻辑控制，在外部主线程可以在倒计时结束后，得到响应。
 
@@ -137,18 +168,18 @@ Bean 复制和对象Clone其实很类似，至少笔者看不出太大区别。O
 在字段比较少，且对性能要求很高的领域，尽量不要使用Bean复制的方法。参考：[Java Bean Copy框架性能对比](https://yq.aliyun.com/articles/392185)
 
 
-# Log4j2
+# 8. Log4j2
 
 - 异步打印日志，效率较高。
 - 系统的System.out等日志会被忽略；程序抛出的异常日志会被忽略。如果需要捕获，需要手动try...catch...然后log.error打印
 
-# fastjson
+# 9. fastjson
 
 json序列化工具。很常用。
 
 - 被序列化的类，在从json转换为对象的时候，需要有无参数的构造方法，否则报异常。
 
-# 跑批任务注意事项
+# 10. 跑批任务注意事项
 
 - 一些周期较长的（比如一周、一个月）执行一次的跑批任务，其中如果有http请求这种网络IO操作，网络IO一旦超时，可能会导致跑批任务失败。
     - 为此，需要增加跑批任务补偿机制，在跑批任务失败的时候，延迟一段时间再次进行跑批。
@@ -174,7 +205,7 @@ Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLTransactio
 
 周期性的任务，建议在Spring中写好Job。一次性的任务，可以使用linux的[at服务](https://blog.csdn.net/a1414345/article/details/74857226)
 
-# @Transaction与动态代理
+# 11. @Transaction与动态代理
 
 @Transaction是一个实现事务的注解。其修饰的方法可以在执行之前开始事务，在结束之后提交事务。用起来非常方便。
 
@@ -183,7 +214,7 @@ Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLTransactio
 @Transaction这个注解管理着事务的传递，如果一个方法A调用方法B，方法A标记了这个注解，但是方法B没有，假设方法A和方法B中均有数据库操作，那么方法A将会开启一个事务，但是方法B不会参与这个事务，并且受到事务隔离级别的影响。
 即，如果方法A插入了一条数据，方法B是无法查询到这条数据的。
 
-## 动态代理
+## 11.1. 动态代理
 
 看了之后，发现不得不去深入了解其实现的内部原理——动态代理。
 
@@ -226,11 +257,11 @@ JDK自己提供了动态代理的方法：java.lang.reflect.Proxy#newProxyInstan
 
 不过作者也没错，并不是每个人都像他一样，研读了各大主流的框架呢。
 
-# HashMap和HashSet
+# 12. HashMap和HashSet
 
 在某些业务逻辑中，因集和的顺序不同可能会产生不同结果的时候，如果适用HashMap或者HashSet，可能会出现数据完全相同，但是产生的结果不同的问题。
 
-# fastjson
+# 13. fastjson
 
 解决map的key为数字的时候，生成的json非标准格式的问题（标准json的key，不能为数字，必须为字符串）
 
@@ -238,7 +269,7 @@ JDK自己提供了动态代理的方法：java.lang.reflect.Proxy#newProxyInstan
 
 使用`SerializerFeature.WriteNonStringKeyAsString`即可
 
-# 编码经验
+# 14. 编码经验
 
 在编写大型项目的时候，自顶向下开发。当遇到依赖子模块的地方时，先编写子模块的接口，暂时不去实现，先把主流程开发完。
 
@@ -246,9 +277,9 @@ JDK自己提供了动态代理的方法：java.lang.reflect.Proxy#newProxyInstan
 - 主流程在开发中，可能会出现接口调整情况，可以避免实现的逻辑要修改
 - 主流程与业务最接近，这样进行开发可以更加贴近业务，避免一些没有意义的方法实现。而是将编码的方向转为“我需要实现什么目标？”
 
-# 先插后查，先插入后查询。联动操作无法正确执行的问题。
+# 15. 先插后查，先插入后查询。联动操作无法正确执行的问题。
 
-## 情况一
+## 15.1. 情况一
 
 如下图代码。writerDao和readerDao是不同的DataSource，即使使用了`@Transactional`，也不可能共用一个事务。
 
@@ -273,7 +304,7 @@ public void insert() {
 }
 ```
 
-## 情况二
+## 15.2. 情况二
 
 ```
 @Override
